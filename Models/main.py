@@ -1,6 +1,4 @@
 import numpy as np
-import torch
-import torchvision
 from torch.utils.data import DataLoader, SubsetRandomSampler
 from torchvision.transforms import transforms
 
@@ -12,10 +10,9 @@ from Models.util.Consts import *
 def main():
     # dataset initialization
     transform = transforms.Compose([
-        transforms.Resize((3, 30, 30)),
+        transforms.Resize((30, 30)),
         transforms.ToTensor(),
-        transforms.Normalize((0.3403, 0.3121, 0.3214),
-                             (0.2724, 0.2608, 0.2669))
+        transforms.Normalize((0.3337, 0.3064, 0.3171), (0.2672, 0.2564, 0.2629))
     ])
 
     trainDataset = GTSRBDataset(transform=transform)
@@ -39,14 +36,16 @@ def main():
 
     # 1st model
     model1 = GTSRBModel(dataLoaders)
+    print(model1)
+    print(model1.countParameters())
     model1.trainModel(epochs)
 
     # 2nd model
-    model2 = GTSRBModel(dataLoaders, dropout=True, batchNormalization=True, withFC=True)
+    model2 = GTSRBModel(dataLoaders, dropout=True, batchNormalization=True)
     model2.trainModel(epochs)
 
     # 3rd
-    model3 = GTSRBModel(dataLoaders, dropout=True, batchNormalization=True)
+    model3 = GTSRBModel(dataLoaders, dropout=True, batchNormalization=True, withFC=False)
     model3.trainModel(epochs)
 
 

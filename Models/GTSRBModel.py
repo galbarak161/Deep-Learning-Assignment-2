@@ -6,19 +6,50 @@ from Models.util.Consts import *
 
 class GTSRBModel(nn.Module):
 
-    def __init__(self, dataLoaders: dict, dropout=False, batchNormalization=False, withFC=False):
+    def __init__(self, dataLoaders: dict, dropout=False, batchNormalization=False, withFC=True):
         super().__init__()
         self.dataLoaders = dataLoaders
-        self.optimizer = torch.optim.Adam(self.parameters())
-        self.lossFunction = torch.nn.CrossEntropyLoss()
-        self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=3)
 
+        self.lossFunction = torch.nn.CrossEntropyLoss()
+
+        self.logSoftMax = nn.LogSoftmax()
+
+        self.featureExtractor = nn.Sequential(
+            # nn.Conv2d(in_channels=3, out_channels=100, kernel_size=5, stride=1, padding=1, bias=False),
+            # nn.ReLU(),
+            # nn.MaxPool2d(kernel_size=3),
+            # nn.Conv2d(in_channels=24, out_channels=150, kernel_size=(3,)),
+            # nn.ReLU()
+        )
+
+        if withFC:
+            self.classifier = nn.Sequential(
+                nn.Flatten(),
+                # nn.Linear(in_features=150, out_features=43)
+                # can add more Relu and linear
+            )
+        else:
+            self.classifier = nn.Sequential(
+                # ...
+
+                # nn.Conv2d(in_channels=6, out_channels=43, kernel_size=(1,))
+            )
+
+        self.optimizer = torch.optim.Adam(self.parameters())
+        self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=3)
         self.to(DEVICE)
 
-    def forward(self):
-        pass
+    def forward(self, x):
+        features = self.featureExtractor(x)
+        classScores = self.classifier(features)
+        return self.logSoftMax(classScores)
+
+    def countParameters(self) -> int:
+        return sum(p.numel() for p in self.parameters() if p.requires_grad)
 
     def getPredictions(self, pathToImage):
+        # need to return prediction with prob
+        # it's for the UI, will implement later
         pass
 
     def calculateAccuracy(self, dataSet: DataLoader, withGrad=True) -> float:
