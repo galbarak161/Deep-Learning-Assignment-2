@@ -37,15 +37,16 @@ def main():
     # 1st model
     model1 = GTSRBModel(dataLoaders)
     print(model1)
-    print(model1.countParameters())
     model1.trainModel(epochs)
 
     # 2nd model
-    model2 = GTSRBModel(dataLoaders, dropout=True, batchNormalization=True)
+    model2 = GTSRBModel(dataLoaders, dropout=True, batch_normalization=True)
+    print(model2)
     model2.trainModel(epochs)
 
-    # 3rd
-    model3 = GTSRBModel(dataLoaders, dropout=True, batchNormalization=True, withFC=False)
+    # 3rd model
+    model3 = GTSRBModel(dataLoaders, dropout=True, batch_normalization=True, fully_connected_nn=False)
+    print(model3)
     model3.trainModel(epochs)
 
 
