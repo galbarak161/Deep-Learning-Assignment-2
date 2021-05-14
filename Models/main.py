@@ -35,16 +35,19 @@ def main():
     epochs = 2
 
     # 1st model
+    print('\n------------------------1st Model------------------------')
     model1 = GTSRBModel(dataLoaders)
     print(model1)
     model1.trainModel(epochs)
 
     # 2nd model
+    print('\n------------------------2nd Model-----------------------')
     model2 = GTSRBModel(dataLoaders, dropout=True, batch_normalization=True)
     print(model2)
     model2.trainModel(epochs)
 
     # 3rd model
+    print('\n------------------------3rd Model------------------------')
     model3 = GTSRBModel(dataLoaders, dropout=True, batch_normalization=True, fully_connected_nn=False)
     print(model3)
     model3.trainModel(epochs)
