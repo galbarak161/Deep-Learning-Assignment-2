@@ -13,7 +13,7 @@ class GTSRBModel(nn.Module):
 
         self.lossFunction = torch.nn.CrossEntropyLoss()
 
-        self.logSoftMax = nn.LogSoftmax()
+        self.logSoftMax = nn.LogSoftmax(dim=1)
 
         self.featureExtractor = nn.Sequential(
             nn.Conv2d(3, out_channels=6, kernel_size=5),
@@ -88,7 +88,8 @@ class GTSRBModel(nn.Module):
     def forward(self, x):
         features = self.featureExtractor(x)
         class_scores = self.classifier(features)
-        return class_scores
+        probabilities = self.logSoftMax(class_scores)
+        return probabilities
 
     def countParameters(self) -> int:
         return sum(p.numel() for p in self.parameters() if p.requires_grad)
@@ -145,7 +146,7 @@ class GTSRBModel(nn.Module):
                 valAcc = self.calculateAccuracy(self.dataLoaders[VALID], with_grad=False)
                 if valAcc > bestValidationAcc:
                     bestValidationAcc = valAcc
-                    torch.save(self.state_dict(), PATH_TO_MODEL)
+                    # torch.save(self.state_dict(), PATH_TO_MODEL)
                     patienceCounter = 0
                 else:
                     patienceCounter += 1
@@ -153,3 +154,10 @@ class GTSRBModel(nn.Module):
                         needToStop = True
 
             epoch += 1
+
+        validationAcc = self.calculateAccuracy(self.dataLoaders[VALID], with_grad=False)
+        testAcc = self.calculateAccuracy(self.dataLoaders[TEST], with_grad=False)
+        print(f'Validation Accuracy: {(validationAcc * 100):.2f}%')
+        print(f'Test Accuracy: {(testAcc * 100):.2f}%')
+        print()
+
