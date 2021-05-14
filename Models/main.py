@@ -32,25 +32,25 @@ def main():
         TEST: DataLoader(testDataset, batch_size=64, num_workers=4)
     }
 
-    epochs = 2
+    epochs = 1
 
     # 1st model
     print('\n------------------------1st Model------------------------')
-    model1 = GTSRBModel(dataLoaders)
+    model1 = GTSRBModel(1)
     print(model1)
-    model1.trainModel(epochs)
+    model1.trainModel(epochs, dataLoaders)
 
     # 2nd model
     print('\n------------------------2nd Model-----------------------')
-    model2 = GTSRBModel(dataLoaders, dropout=True, batch_normalization=True)
+    model2 = GTSRBModel(2, dropout=True, batch_normalization=True)
     print(model2)
-    model2.trainModel(epochs)
+    model2.trainModel(epochs, dataLoaders)
 
     # 3rd model
     print('\n------------------------3rd Model------------------------')
-    model3 = GTSRBModel(dataLoaders, dropout=True, batch_normalization=True, fully_connected_nn=False)
+    model3 = GTSRBModel(3, dropout=True, batch_normalization=True, fully_connected_nn=False)
     print(model3)
-    model3.trainModel(epochs)
+    model3.trainModel(epochs, dataLoaders)
 
 
 if __name__ == '__main__':

@@ -1,16 +1,20 @@
+import os
+
+from PIL import Image
 from torch import nn
 from torch.utils.data import DataLoader
+from torchvision import transforms
 
+from Models.model.ModelMeta import PATH_TO_MODEL
 from Models.util.Consts import *
 
 
 class GTSRBModel(nn.Module):
 
-    def __init__(self, data_loaders: dict, dropout=False, batch_normalization=False, fully_connected_nn=True):
+    def __init__(self, modelId, dropout=False, batch_normalization=False, fully_connected_nn=True):
         super().__init__()
 
-        self.dataLoaders = data_loaders
-
+        self.modelId = modelId
         self.lossFunction = torch.nn.CrossEntropyLoss()
 
         self.logSoftMax = nn.LogSoftmax(dim=1)
@@ -94,11 +98,21 @@ class GTSRBModel(nn.Module):
     def countParameters(self) -> int:
         return sum(p.numel() for p in self.parameters() if p.requires_grad)
 
-    def getPredictions(self, path_to_image):
-        self.eval()
-        # need to return prediction with prob
-        # it's for the UI, will implement later
-        pass
+    def getPredictions(self, pathToImage):
+        img = Image.open(pathToImage)
+
+        transform = transforms.Compose([
+            transforms.Resize((30, 30)),
+            transforms.ToTensor(),
+            transforms.Normalize((0.3337, 0.3064, 0.3171), (0.2672, 0.2564, 0.2629))
+        ])
+
+        img = transform(img)
+        img = img.unsqueeze(0)
+        with torch.no_grad():
+            probabilities = self(img)
+            prediction = torch.argmax(probabilities, dim=1)[0].item()
+            return prediction
 
     def calculateAccuracy(self, data_set: DataLoader, with_grad=True) -> float:
 
@@ -118,7 +132,7 @@ class GTSRBModel(nn.Module):
 
             return (nCorrect / total).item()
 
-    def trainModel(self, epochs, with_early_stopping=True):
+    def trainModel(self, epochs, dataLoaders, with_early_stopping=True):
 
         # early stopping params
         bestValidationAcc = 0
@@ -130,7 +144,7 @@ class GTSRBModel(nn.Module):
         while epoch < epochs and not needToStop:
             self.train()
 
-            for data, labels in self.dataLoaders[TRAIN]:
+            for data, labels in dataLoaders[TRAIN]:
                 data, labels = data.to(DEVICE), labels.to(DEVICE)
 
                 self.optimizer.zero_grad()
@@ -143,10 +157,10 @@ class GTSRBModel(nn.Module):
 
             if with_early_stopping:
                 self.eval()
-                valAcc = self.calculateAccuracy(self.dataLoaders[VALID], with_grad=False)
+                valAcc = self.calculateAccuracy(dataLoaders[VALID], with_grad=False)
                 if valAcc > bestValidationAcc:
                     bestValidationAcc = valAcc
-                    # torch.save(self.state_dict(), PATH_TO_MODEL)
+                    torch.save(self.state_dict(), os.path.join(PATH_TO_MODEL, f'model_{self.modelId}.pth'))
                     patienceCounter = 0
                 else:
                     patienceCounter += 1
@@ -155,9 +169,8 @@ class GTSRBModel(nn.Module):
 
             epoch += 1
 
-        validationAcc = self.calculateAccuracy(self.dataLoaders[VALID], with_grad=False)
-        testAcc = self.calculateAccuracy(self.dataLoaders[TEST], with_grad=False)
+        validationAcc = self.calculateAccuracy(dataLoaders[VALID], with_grad=False)
+        testAcc = self.calculateAccuracy(dataLoaders[TEST], with_grad=False)
         print(f'Validation Accuracy: {(validationAcc * 100):.2f}%')
         print(f'Test Accuracy: {(testAcc * 100):.2f}%')
         print()
-
