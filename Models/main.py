@@ -47,7 +47,7 @@ def main():
 
     epochs = 2
 
-    """# 1st model
+    # 1st model
     print('\n------------------------1st Model------------------------')
     start_time = time.time()
     model1 = GTSRBModel(1)
@@ -65,7 +65,7 @@ def main():
     print(f'number of parameters: {model2.count_parameters()}')
     model2.train_model(epochs, dataLoaders)
     end_time = time.time()
-    print_time(end_time - start_time)"""
+    print_time(end_time - start_time)
 
     # 3rd model
     print('\n------------------------3rd Model------------------------')

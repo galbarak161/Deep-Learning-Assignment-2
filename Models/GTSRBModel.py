@@ -153,6 +153,8 @@ class GTSRBModel(nn.Module):
 
                 self.optimizer.zero_grad()
                 predictions = self(data).to(DEVICE)
+                predictions = predictions.squeeze()
+
                 loss = self.lossFunction(predictions, labels).to(DEVICE)
                 loss.backward()
                 self.optimizer.step()
