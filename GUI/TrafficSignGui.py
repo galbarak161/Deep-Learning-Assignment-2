@@ -21,8 +21,8 @@ inputSign = Label(top)
 resultsSign = Label(top)
 
 
-def classify(filePath):
-    prediction = model.getPredictions(filePath)
+def classify(file_path):
+    prediction = model.get_predictions(file_path)
     sign = classes[prediction + 1]
 
     signName.configure(foreground='#011638', text="Sign: " + sign)
@@ -36,8 +36,8 @@ def classify(filePath):
     resultsSign.image = img
 
 
-def showClassifyButton(filePath):
-    classifyButton = Button(top, text="Classify Image", command=lambda: classify(filePath), padx=10, pady=5)
+def showClassifyButton(file_path):
+    classifyButton = Button(top, text="Classify Image", command=lambda: classify(file_path), padx=10, pady=5)
     classifyButton.configure(background='#364156', foreground='white', font=('arial', 10, 'bold'))
     classifyButton.place(relx=0.75, rely=0.9, anchor=CENTER)
 
