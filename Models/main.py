@@ -1,9 +1,9 @@
 import numpy as np
-from torch.utils.data import DataLoader, SubsetRandomSampler
-from torchvision.transforms import transforms
+from torch.utils.data import DataLoader, SubsetRandomSampler, ConcatDataset
 import time
 from Models.GTSRBDataset import GTSRBDataset
 from Models.GTSRBModel import GTSRBModel
+from Models.Transforms import transformations
 from Models.util.Consts import *
 
 
@@ -19,14 +19,16 @@ def print_time(time_taken: float) -> None:
 
 def main():
     # dataset initialization
-    transform = transforms.Compose([
-        transforms.Resize((30, 30)),
-        transforms.ToTensor(),
-        transforms.Normalize((0.3337, 0.3064, 0.3171), (0.2672, 0.2564, 0.2629))
-    ])
+    datasets = []
+    for _, data_transform in transformations.items():
+        dataset = GTSRBDataset(transform=data_transform)
+        datasets.append(dataset)
 
-    trainDataset = GTSRBDataset(transform=transform)
-    testDataset = GTSRBDataset(train=False, transform=transform)
+    trainDataset = ConcatDataset(datasets)
+    oldTrainDataset = GTSRBDataset(transform=transformations['data_transforms'])
+    testDataset = GTSRBDataset(train=False, transform=transformations['data_transforms'])
+
+    print(f'old data size: {len(oldTrainDataset)}, new size: {len(trainDataset)}')
 
     validationRatio = 0.2
 
