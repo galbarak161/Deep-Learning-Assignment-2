@@ -56,16 +56,21 @@ def uploadImage():
     showClassifyButton(file_path)
 
 
-heading = Label(top, text="Traffic Sign Recognizer", pady=15, font=('arial', 15, 'bold'))
-heading.configure(background='#CDCDCD', foreground='#011638')
-heading.place(relx=0.5, rely=0.1, anchor=CENTER)
+def main():
+    heading = Label(top, text="Traffic Sign Recognizer", pady=15, font=('arial', 15, 'bold'))
+    heading.configure(background='#CDCDCD', foreground='#011638')
+    heading.place(relx=0.5, rely=0.1, anchor=CENTER)
 
-uploadButton = Button(top, text="Upload an Image", command=uploadImage, padx=10, pady=5)
-uploadButton.configure(background='#364156', foreground='white', font=('arial', 10, 'bold'))
-uploadButton.place(relx=0.25, rely=0.9, anchor=CENTER)
+    uploadButton = Button(top, text="Upload an Image", command=uploadImage, padx=10, pady=5)
+    uploadButton.configure(background='#364156', foreground='white', font=('arial', 10, 'bold'))
+    uploadButton.place(relx=0.25, rely=0.9, anchor=CENTER)
 
-inputSign.place(relx=0.25, rely=0.6, anchor=CENTER)
-resultsSign.place(relx=0.75, rely=0.6, anchor=CENTER)
-signName.place(relx=0.5, rely=0.2, anchor=CENTER)
+    inputSign.place(relx=0.25, rely=0.6, anchor=CENTER)
+    resultsSign.place(relx=0.75, rely=0.6, anchor=CENTER)
+    signName.place(relx=0.5, rely=0.2, anchor=CENTER)
 
-top.mainloop()
+    top.mainloop()
+
+
+if __name__ == '__main__':
+    main()

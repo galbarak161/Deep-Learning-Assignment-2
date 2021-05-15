@@ -1,10 +1,12 @@
 import os
 
 from PIL import Image
+from matplotlib import pyplot as plt
 from torch import nn
 from torch.utils.data import DataLoader
 from torchvision import transforms
 
+from Models.plots.PlotsMeta import PATH_TO_PLOTS
 from Models.model.ModelMeta import PATH_TO_MODEL
 from Models.util.Consts import *
 
@@ -110,8 +112,10 @@ class GTSRBModel(nn.Module):
         img = transform(img)
         img = img.unsqueeze(0)
         with torch.no_grad():
-            probabilities = self(img)
-            prediction = torch.argmax(probabilities, dim=1)[0].item()
+            self.eval()
+            probabilities = self(img).squeeze()
+            prediction = torch.argmax(probabilities).item()
+
             return prediction
 
     def calculateAccuracy(self, data_set: DataLoader, with_grad=True) -> float:
@@ -119,18 +123,18 @@ class GTSRBModel(nn.Module):
         with torch.set_grad_enabled(with_grad):
             nCorrect = 0
             total = 0
-            for data, label in data_set:
-                data, label = data.to(DEVICE), label.to(DEVICE)
+            for data, labels in data_set:
+                data, labels = data.to(DEVICE), labels.to(DEVICE)
 
                 # calculate output
-                predictionsProbabilities = self(data)
+                predictionsProbabilities = self(data).squeeze()
 
                 # get the prediction
-                prediction = torch.argmax(predictionsProbabilities, dim=1)
-                nCorrect += torch.sum(prediction == label.to(DEVICE)).type(torch.float32)
+                predictions = torch.argmax(predictionsProbabilities, dim=1)
+                nCorrect += torch.sum(predictions == labels).item()
                 total += data.shape[0]
 
-            return (nCorrect / total).item()
+            return nCorrect / total
 
     def trainModel(self, epochs, dataLoaders, with_early_stopping=True):
 
@@ -139,6 +143,9 @@ class GTSRBModel(nn.Module):
         patienceLimit = 20
         patienceCounter = 0
         needToStop = False
+        best_model_epoch_number = 0
+
+        val_accuracies = []
 
         epoch = 0
         while epoch < epochs and not needToStop:
@@ -149,6 +156,8 @@ class GTSRBModel(nn.Module):
 
                 self.optimizer.zero_grad()
                 predictions = self(data).to(DEVICE)
+                predictions = predictions.squeeze()
+
                 loss = self.lossFunction(predictions, labels).to(DEVICE)
                 loss.backward()
                 self.optimizer.step()
@@ -158,16 +167,30 @@ class GTSRBModel(nn.Module):
             if with_early_stopping:
                 self.eval()
                 valAcc = self.calculateAccuracy(dataLoaders[VALID], with_grad=False)
+                val_accuracies.append(valAcc)
                 if valAcc > bestValidationAcc:
                     bestValidationAcc = valAcc
                     torch.save(self.state_dict(), os.path.join(PATH_TO_MODEL, f'model_{self.modelId}.pth'))
                     patienceCounter = 0
+                    best_model_epoch_number = epoch
                 else:
                     patienceCounter += 1
                     if patienceCounter >= patienceLimit:
                         needToStop = True
 
             epoch += 1
+
+        fig = plt.figure()
+        plot_name = f'Validation accuracy per epoch - Model_{self.modelId}'
+        plt.title(plot_name)
+        plt.plot(val_accuracies)
+        if with_early_stopping:
+            plt.plot(best_model_epoch_number, val_accuracies[best_model_epoch_number], 'r*',
+                     label='Best Validation Accuracy')
+        plt.legend()
+        fig.savefig(os.path.join(PATH_TO_PLOTS, plot_name))
+        plt.close(fig)
+        plt.clf()
 
         validationAcc = self.calculateAccuracy(dataLoaders[VALID], with_grad=False)
         testAcc = self.calculateAccuracy(dataLoaders[TEST], with_grad=False)
