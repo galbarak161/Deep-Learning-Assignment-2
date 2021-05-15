@@ -34,17 +34,17 @@ def main():
         special_dataset = GTSRBDataset(transform_sample, transform=data_transform)
         datasets.append(special_dataset)
 
-    trainDataset = ConcatDataset(datasets)
-    oldTrainDataset = GTSRBDataset(transform=DEFAULT_TRANSFORM)
-    testDataset = GTSRBDataset(train=False, transform=DEFAULT_TRANSFORM)
+    train_dataset = ConcatDataset(datasets)
+    old_train_dataset = GTSRBDataset(transform=DEFAULT_TRANSFORM)
+    test_dataset = GTSRBDataset(train=False, transform=DEFAULT_TRANSFORM)
 
-    print(f'old data size: {len(oldTrainDataset)}, new size: {len(trainDataset)}')
+    print(f'old data size: {len(old_train_dataset)}, new size: {len(train_dataset)}')
 
     validationRatio = 0.2
 
-    indices = list(range(len(trainDataset)))
+    indices = list(range(len(train_dataset)))
     np.random.shuffle(indices)
-    split = int(np.floor(validationRatio * len(trainDataset)))
+    split = int(np.floor(validationRatio * len(train_dataset)))
     trainSample = SubsetRandomSampler(indices[:split])
     validSample = SubsetRandomSampler(indices[split:])
 
@@ -52,9 +52,9 @@ def main():
     num_workers = 4
 
     dataLoaders = {
-        TRAIN: DataLoader(trainDataset, batch_size=batch_size, num_workers=num_workers, sampler=trainSample),
-        VALID: DataLoader(trainDataset, batch_size=batch_size, num_workers=num_workers, sampler=validSample),
-        TEST: DataLoader(testDataset, batch_size=batch_size, num_workers=num_workers)
+        TRAIN: DataLoader(train_dataset, batch_size=batch_size, num_workers=num_workers, sampler=trainSample),
+        VALID: DataLoader(train_dataset, batch_size=batch_size, num_workers=num_workers, sampler=validSample),
+        TEST: DataLoader(test_dataset, batch_size=batch_size, num_workers=num_workers)
     }
 
     epochs = 1
