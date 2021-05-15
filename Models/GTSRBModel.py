@@ -16,6 +16,11 @@ class GTSRBModel(nn.Module):
     def __init__(self, model_id, dropout=False, batch_normalization=False, fully_connected_nn=True):
         super().__init__()
 
+        # Hyperparameters
+        rate = 0.001
+        weight_decay = 0.001
+        dropout_p = 0.2
+
         self.modelId = model_id
         self.lossFunction = torch.nn.CrossEntropyLoss()
 
@@ -52,7 +57,7 @@ class GTSRBModel(nn.Module):
         model_id += 1
 
         if dropout:
-            self.classifier.add_module(f'{model_id}', nn.Dropout(0.2))
+            self.classifier.add_module(f'{model_id}', nn.Dropout(dropout_p))
             model_id += 1
 
         if fully_connected_nn:
@@ -73,7 +78,7 @@ class GTSRBModel(nn.Module):
         model_id += 1
 
         if dropout:
-            self.classifier.add_module(f'{model_id}', nn.Dropout(0.2))
+            self.classifier.add_module(f'{model_id}', nn.Dropout(dropout_p))
             model_id += 1
 
         if fully_connected_nn:
@@ -84,7 +89,7 @@ class GTSRBModel(nn.Module):
             self.classifier.add_module(f'{model_id}', nn.Conv2d(in_channels=84, out_channels=43, kernel_size=(1, 1)))
             model_id += 1
 
-        self.optimizer = torch.optim.Adam(self.parameters(), lr=0.001, weight_decay=0.001)
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=rate, weight_decay=weight_decay)
         self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=3, gamma=0.8)
 
         self.to(DEVICE)
@@ -109,8 +114,9 @@ class GTSRBModel(nn.Module):
 
         img = transform(img)
         img = img.unsqueeze(0)
+
+        self.eval()
         with torch.no_grad():
-            self.eval()
             probabilities = self(img).squeeze()
             prediction = torch.argmax(probabilities).item()
 

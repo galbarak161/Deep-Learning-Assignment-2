@@ -45,7 +45,7 @@ def main():
         TEST: DataLoader(testDataset, batch_size=batch_size, num_workers=num_workers)
     }
 
-    epochs = 2
+    epochs = 200
 
     # 1st model
     print('\n------------------------1st Model------------------------')
