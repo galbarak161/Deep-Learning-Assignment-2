@@ -1,10 +1,20 @@
 import numpy as np
 from torch.utils.data import DataLoader, SubsetRandomSampler
 from torchvision.transforms import transforms
-
+import time
 from Models.GTSRBDataset import GTSRBDataset
 from Models.GTSRBModel import GTSRBModel
 from Models.util.Consts import *
+
+
+def print_time(time_taken: float) -> None:
+    """
+    Utility function for time printing
+    :param time_taken: the time we need to print
+    """
+    hours, rem = divmod(time_taken, 3600)
+    minutes, seconds = divmod(rem, 60)
+    print("\tTime taken: {:0>2}:{:0>2}:{:05.2f}\n".format(int(hours), int(minutes), seconds))
 
 
 def main():
@@ -26,31 +36,46 @@ def main():
     trainSample = SubsetRandomSampler(indices[:split])
     validSample = SubsetRandomSampler(indices[split:])
 
+    batch_size = 128
+    num_workers = 4
+
     dataLoaders = {
-        TRAIN: DataLoader(trainDataset, batch_size=64, num_workers=4, sampler=trainSample),
-        VALID: DataLoader(trainDataset, batch_size=64, num_workers=4, sampler=validSample),
-        TEST: DataLoader(testDataset, batch_size=64, num_workers=4)
+        TRAIN: DataLoader(trainDataset, batch_size=batch_size, num_workers=num_workers, sampler=trainSample),
+        VALID: DataLoader(trainDataset, batch_size=batch_size, num_workers=num_workers, sampler=validSample),
+        TEST: DataLoader(testDataset, batch_size=batch_size, num_workers=num_workers)
     }
 
-    epochs = 1
+    epochs = 2
 
-    # 1st model
+    """# 1st model
     print('\n------------------------1st Model------------------------')
+    start_time = time.time()
     model1 = GTSRBModel(1)
     print(model1)
-    model1.trainModel(epochs, dataLoaders)
+    print(f'number of parameters: {model1.count_parameters()}')
+    model1.train_model(epochs, dataLoaders)
+    end_time = time.time()
+    print_time(end_time - start_time)
 
     # 2nd model
     print('\n------------------------2nd Model-----------------------')
+    start_time = time.time()
     model2 = GTSRBModel(2, dropout=True, batch_normalization=True)
     print(model2)
-    model2.trainModel(epochs, dataLoaders)
+    print(f'number of parameters: {model2.count_parameters()}')
+    model2.train_model(epochs, dataLoaders)
+    end_time = time.time()
+    print_time(end_time - start_time)"""
 
     # 3rd model
     print('\n------------------------3rd Model------------------------')
+    start_time = time.time()
     model3 = GTSRBModel(3, dropout=True, batch_normalization=True, fully_connected_nn=False)
     print(model3)
-    model3.trainModel(epochs, dataLoaders)
+    print(f'number of parameters: {model3.count_parameters()}')
+    model3.train_model(epochs, dataLoaders)
+    end_time = time.time()
+    print_time(end_time - start_time)
 
 
 if __name__ == '__main__':
