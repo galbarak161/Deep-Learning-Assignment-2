@@ -1,11 +1,12 @@
 from torchvision import transforms
 
+DEFAULT_TRANSFORM = transforms.Compose([
+    transforms.Resize((30, 30)),
+    transforms.ToTensor(),
+    transforms.Normalize((0.3337, 0.3064, 0.3171), (0.2672, 0.2564, 0.2629))
+])
+
 transformations = {
-    'data_transforms': transforms.Compose([
-        transforms.Resize((30, 30)),
-        transforms.ToTensor(),
-        transforms.Normalize((0.3337, 0.3064, 0.3171), (0.2672, 0.2564, 0.2629))
-    ]),
 
     # Resize, normalize and jitter image brightness -----------------
     'data_jitter_brightness': transforms.Compose([

@@ -4,8 +4,8 @@ from PIL import Image
 from matplotlib import pyplot as plt
 from torch import nn
 from torch.utils.data import DataLoader
-from torchvision import transforms
 
+from Models.Transforms import DEFAULT_TRANSFORM
 from Models.plots.PlotsMeta import PATH_TO_PLOTS
 from Models.model.ModelMeta import PATH_TO_MODEL
 from Models.util.Consts import *
@@ -105,14 +105,7 @@ class GTSRBModel(nn.Module):
 
     def get_predictions(self, path_to_image):
         img = Image.open(path_to_image)
-
-        transform = transforms.Compose([
-            transforms.Resize((30, 30)),
-            transforms.ToTensor(),
-            transforms.Normalize((0.3337, 0.3064, 0.3171), (0.2672, 0.2564, 0.2629))
-        ])
-
-        img = transform(img)
+        img = DEFAULT_TRANSFORM(img)
         img = img.unsqueeze(0)
 
         self.eval()

@@ -3,7 +3,7 @@ from torch.utils.data import DataLoader, SubsetRandomSampler, ConcatDataset
 import time
 from Models.GTSRBDataset import GTSRBDataset
 from Models.GTSRBModel import GTSRBModel
-from Models.Transforms import transformations
+from Models.Transforms import transformations, DEFAULT_TRANSFORM
 from Models.util.Consts import *
 
 
@@ -19,14 +19,24 @@ def print_time(time_taken: float) -> None:
 
 def main():
     # dataset initialization
-    datasets = []
-    for _, data_transform in transformations.items():
-        dataset = GTSRBDataset(transform=data_transform)
-        datasets.append(dataset)
+    def_dataset = GTSRBDataset(transform=DEFAULT_TRANSFORM)
+    datasets = [def_dataset]
+
+    special_transforms_ratio = 0.2
+
+    train_set_size = len(def_dataset)
+    indices = list(range(train_set_size))
+    for data_transform in transformations.values():
+        np.random.shuffle(indices)
+        split = int(np.floor(special_transforms_ratio * train_set_size))
+        transform_sample = indices[:split]
+
+        special_dataset = GTSRBDataset(transform_sample, transform=data_transform)
+        datasets.append(special_dataset)
 
     trainDataset = ConcatDataset(datasets)
-    oldTrainDataset = GTSRBDataset(transform=transformations['data_transforms'])
-    testDataset = GTSRBDataset(train=False, transform=transformations['data_transforms'])
+    oldTrainDataset = GTSRBDataset(transform=DEFAULT_TRANSFORM)
+    testDataset = GTSRBDataset(train=False, transform=DEFAULT_TRANSFORM)
 
     print(f'old data size: {len(oldTrainDataset)}, new size: {len(trainDataset)}')
 
@@ -47,7 +57,7 @@ def main():
         TEST: DataLoader(testDataset, batch_size=batch_size, num_workers=num_workers)
     }
 
-    epochs = 200
+    epochs = 1
 
     # 1st model
     print('\n------------------------1st Model------------------------')
