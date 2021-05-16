@@ -138,20 +138,20 @@ GTSRBModel(
 number of parameters: 56483
 ```
 
-## Trainig Results
+## Training Results
 ```
 model 1
-  early stopping after 111 / 150
-  Validation Accuracy: 95.57%
-  Test Accuracy: 95.91%
+    early stopping after 134 / 150
+    Validation Accuracy: 96.66%
+    Test Accuracy: 96.99%
 
   model 2
-  early stopping after 96 / 150
-  Validation Accuracy: 96.46%
-  Test Accuracy: 97.38%
+    early stopping after 84 / 120
+    Validation Accuracy: 97.32%
+    Test Accuracy: 97.51%
 
   model 3
-  early stopping after 93 / 150
-  Validation Accuracy: 96.78%
-  Test Accuracy: 97.26%
+    early stopping after 66 / 120
+    Validation Accuracy: 97.30%
+    Test Accuracy: 98.09%
 ```
