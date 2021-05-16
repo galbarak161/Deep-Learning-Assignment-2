@@ -8,10 +8,10 @@ This project also includes GUI for our traffic sign classifier.
 
 ---
 ## Load The Data
-we used the original Kaggle dataset from here: 
-https://www.kaggle.com/meowmeowmeowmeowmeow/gtsrb-german-traffic-sign
+we used the original Kaggle dataset from [here](https://www.kaggle.com/meowmeowmeowmeowmeow/gtsrb-german-traffic-sign).
 
-The dataset contains almost 40,000 images of different traffic signs. It is further classified into 43 different classes. Then we used several techniques of dataset augmentations to create more training and validation data.
+The dataset contains almost 40,000 images of different traffic signs. It is further classified into 43 different classes. 
+Then we used several techniques of dataset augmentations to create more training and validation data.
 
 ```
     old data size: 39209, new size: 133301
