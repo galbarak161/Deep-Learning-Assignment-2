@@ -1,23 +1,23 @@
 # Deep-Learning-Assignment-2
 Deep Learning Assignment 2: Convolutional neural networks.
 
-In this assignment we implemented a module for traffic sign classification using CNNs. 
+In this assignment, we implemented a module for traffic sign classification using CNNs. 
 We decided about the architecture and training details. 
 
-This project includs also GUI for our traffic sign classifier.
+This project also includes GUI for our traffic sign classifier.
 
 ---
 ## Load The Data
-we used the orignal Kaggle dataset from here: 
+we used the original Kaggle dataset from here: 
 https://www.kaggle.com/meowmeowmeowmeowmeow/gtsrb-german-traffic-sign
 
-The dataset contains almost 40,000 images of different traffic signs. It is further classified into 43 different classes. then we used servel techniques of dataset augmentations to create more training and validation data.
+The dataset contains almost 40,000 images of different traffic signs. It is further classified into 43 different classes. Then we used several techniques of dataset augmentations to create more training and validation data.
 
 ```
     old data size: 39209, new size: 133301
 ```
 
- ## Networks visualization   
+ ## Networks Visualization   
 
 ```
 ------------------------1st Model------------------------
@@ -138,7 +138,7 @@ GTSRBModel(
 number of parameters: 56483
 ```
 
-## trainig results
+## Trainig Results
 ```
 model 1
   early stopping after 111 / 150
