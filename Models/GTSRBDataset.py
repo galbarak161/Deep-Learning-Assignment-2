@@ -1,8 +1,11 @@
 import os
-
 import pandas as pd
 from torch.utils.data import Dataset
 from PIL import Image
+
+TRAIN = 'train'
+VALID = 'validation'
+TEST = 'test'
 
 
 class GTSRBDataset(Dataset):

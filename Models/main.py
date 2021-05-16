@@ -1,10 +1,9 @@
 import numpy as np
 from torch.utils.data import DataLoader, SubsetRandomSampler, ConcatDataset
 import time
-from Models.GTSRBDataset import GTSRBDataset
+from Models.GTSRBDataset import GTSRBDataset, TRAIN, TEST, VALID
 from Models.GTSRBModel import GTSRBModel
 from Models.Transforms import transformations, DEFAULT_TRANSFORM
-from Models.util.Consts import *
 
 
 def print_time(time_taken: float) -> None:
@@ -22,7 +21,7 @@ def main():
     def_dataset = GTSRBDataset(transform=DEFAULT_TRANSFORM)
     datasets = [def_dataset]
 
-    special_transforms_ratio = 0.2
+    special_transforms_ratio = 0.5
 
     train_set_size = len(def_dataset)
     indices = list(range(train_set_size))
@@ -38,7 +37,7 @@ def main():
     old_train_dataset = GTSRBDataset(transform=DEFAULT_TRANSFORM)
     test_dataset = GTSRBDataset(train=False, transform=DEFAULT_TRANSFORM)
 
-    print(f'old data size: {len(old_train_dataset)}, new size: {len(train_dataset)}')
+    print(f'old train set size: {len(old_train_dataset)}, new train set size: {len(train_dataset)}')
 
     validationRatio = 0.2
 
@@ -57,7 +56,7 @@ def main():
         TEST: DataLoader(test_dataset, batch_size=batch_size, num_workers=num_workers)
     }
 
-    epochs = 1
+    epochs = 120
 
     # 1st model
     print('\n------------------------1st Model------------------------')

@@ -1,15 +1,18 @@
 import os
 
+import torch
 from PIL import Image
 from matplotlib import pyplot as plt
 from torch import nn
 import torch.nn.functional as nn_functional
 from torch.utils.data import DataLoader
 
+from Models.GTSRBDataset import TRAIN, VALID, TEST
 from Models.Transforms import DEFAULT_TRANSFORM
 from Models.plots.PlotsMeta import PATH_TO_PLOTS
 from Models.model.ModelMeta import PATH_TO_MODEL
-from Models.util.Consts import *
+
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class GTSRBModel(nn.Module):
@@ -116,7 +119,7 @@ class GTSRBModel(nn.Module):
         self.to(DEVICE)
 
     # Spatial transformer network forward function
-    def stn(self, x):
+    def spatial_transformer_network(self, x):
         xs = self.localization(x)
         xs = xs.view(-1, 10 * 4 * 4)
         theta = self.fc_loc(xs)
@@ -127,20 +130,8 @@ class GTSRBModel(nn.Module):
 
     def forward(self, x):
         # transform the input
-        x = self.stn(x)
+        x = self.spatial_transformer_network(x)
 
-        """# Perform forward pass
-        x = self.bn1(F.max_pool2d(F.leaky_relu(self.conv1(x)), 2))
-        x = self.conv_drop(x)
-        x = self.bn2(F.max_pool2d(F.leaky_relu(self.conv2(x)), 2))
-        x = self.conv_drop(x)
-        x = self.bn3(F.max_pool2d(F.leaky_relu(self.conv3(x)), 2))
-        x = self.conv_drop(x)
-        x = x.view(-1, 250 * 2 * 2)
-        x = F.relu(self.fc1(x))
-        x = F.dropout(x, training=self.training)
-        x = self.fc2(x)
-        return F.log_softmax(x, dim=1)"""
         features = self.featureExtractor(x)
         class_scores = self.classifier(features)
         probabilities = self.logSoftMax(class_scores)
