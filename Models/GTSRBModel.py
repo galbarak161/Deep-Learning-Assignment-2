@@ -173,8 +173,7 @@ class GTSRBModel(nn.Module):
                 n_correct += torch.sum(predictions == labels).item()
                 total += data.shape[0]
 
-            loss = np.mean(losses)
-            return n_correct / total, loss
+            return n_correct / total, torch.mean(torch.stack(losses).cpu(), dim=0)
 
     def train_model(self, epochs: int, data_loaders: dict):
         # early stopping params
