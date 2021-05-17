@@ -8,7 +8,7 @@ from torch import nn
 import torch.nn.functional as nn_functional
 from torch.utils.data import DataLoader
 
-# from Models.GTSRBDataset import TRAIN, VALID, TEST
+from Models.GTSRBDataset import TRAIN, VALID, TEST
 from Models.Transforms import DEFAULT_TRANSFORM
 from Models.plots.PlotsMeta import PATH_TO_PLOTS
 from Models.model.ModelMeta import PATH_TO_MODEL
