@@ -1,5 +1,6 @@
 import os
 
+import numpy as np
 import torch
 from PIL import Image
 from matplotlib import pyplot as plt
@@ -7,7 +8,7 @@ from torch import nn
 import torch.nn.functional as nn_functional
 from torch.utils.data import DataLoader
 
-from Models.GTSRBDataset import TRAIN, VALID, TEST
+# from Models.GTSRBDataset import TRAIN, VALID, TEST
 from Models.Transforms import DEFAULT_TRANSFORM
 from Models.plots.PlotsMeta import PATH_TO_PLOTS
 from Models.model.ModelMeta import PATH_TO_MODEL
@@ -17,10 +18,10 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class GTSRBModel(nn.Module):
 
-    def __init__(self, model_id, dropout=False, batch_normalization=False, fully_connected_nn=True):
+    def __init__(self, model_id, dropout=False, batch_normalization=False, fully_connected_layers=True):
         super().__init__()
 
-        # Hyper-parameters
+        # Hyper parameters
         rate = 0.001
         weight_decay = 0.001
         dropout_p = 0.2
@@ -40,9 +41,8 @@ class GTSRBModel(nn.Module):
         )
 
         self.classifier = nn.Sequential()
-
         model_id = 0
-        if fully_connected_nn:
+        if fully_connected_layers:
             self.classifier.add_module(f'{model_id}', nn.Flatten())
             model_id += 1
             self.classifier.add_module(f'{model_id}', nn.Linear(16 * 4 * 4, 120))
@@ -65,7 +65,7 @@ class GTSRBModel(nn.Module):
             self.classifier.add_module(f'{model_id}', nn.Dropout(dropout_p))
             model_id += 1
 
-        if fully_connected_nn:
+        if fully_connected_layers:
             self.classifier.add_module(f'{model_id}', nn.Linear(120, 84))
             model_id += 1
             if batch_normalization:
@@ -86,7 +86,7 @@ class GTSRBModel(nn.Module):
             self.classifier.add_module(f'{model_id}', nn.Dropout(dropout_p))
             model_id += 1
 
-        if fully_connected_nn:
+        if fully_connected_layers:
             self.classifier.add_module(f'{model_id}', nn.Linear(84, 43))
             model_id += 1
 
@@ -152,38 +152,50 @@ class GTSRBModel(nn.Module):
 
             return prediction
 
-    def calculate_accuracy(self, data_set: DataLoader, with_grad=True) -> float:
+    def calculate_accuracy_and_loss(self, data_set: DataLoader):
         self.eval()
-        with torch.set_grad_enabled(with_grad):
+        with torch.no_grad():
             n_correct = 0
             total = 0
+
+            losses = []
+
             for data, labels in data_set:
                 data, labels = data.to(DEVICE), labels.to(DEVICE)
 
                 # calculate output
-                predictions_probabilities = self(data).squeeze()
+                predictions_probabilities = self(data).squeeze().to(DEVICE)
 
+                loss = self.lossFunction(predictions_probabilities, labels).to(DEVICE)
+                losses.append(loss.detach())
                 # get the prediction
                 predictions = torch.argmax(predictions_probabilities, dim=1)
                 n_correct += torch.sum(predictions == labels).item()
                 total += data.shape[0]
 
-            return n_correct / total
+            loss = np.mean(losses)
+            return n_correct / total, loss
 
-    def train_model(self, epochs: int, data_loaders: dict, with_early_stopping=True):
-
+    def train_model(self, epochs: int, data_loaders: dict):
         # early stopping params
         best_validation_acc = 0
         patience_limit = 20
         patience_counter = 0
         need_to_stop = False
         best_model_epoch_number = 0
-        val_accuracies = []
 
+        # results lists
+        train_accuracies = []
+        train_losses = []
+        val_accuracies = []
+        valid_losses = []
+
+        # training loop
         epoch = 0
         while epoch < epochs and not need_to_stop:
-            self.train()
 
+            # train phase
+            self.train()
             for data, labels in data_loaders[TRAIN]:
                 data, labels = data.to(DEVICE), labels.to(DEVICE)
 
@@ -197,37 +209,59 @@ class GTSRBModel(nn.Module):
 
             self.scheduler.step()
 
-            if with_early_stopping:
-                self.eval()
-                val_acc = self.calculate_accuracy(data_loaders[VALID], with_grad=False)
-                val_accuracies.append(val_acc)
-                if val_acc > best_validation_acc:
-                    best_validation_acc = val_acc
-                    torch.save(self.state_dict(), os.path.join(PATH_TO_MODEL, f'model_{self.modelId}.pth'))
-                    patience_counter = 0
-                    best_model_epoch_number = epoch
-                else:
-                    patience_counter += 1
-                    if patience_counter >= patience_limit:
-                        need_to_stop = True
-                        print(f'early stopping after {epoch} / {epochs}')
+            # calc acc and losses
+            train_acc, train_loss = self.calculate_accuracy_and_loss(data_loaders[TRAIN])
+            train_accuracies.append(train_acc)
+            train_losses.append(train_loss)
+            val_acc, val_loss = self.calculate_accuracy_and_loss(data_loaders[VALID])
+            valid_losses.append(val_loss)
+            val_accuracies.append(val_acc)
+
+            # early stopping check
+            if val_acc > best_validation_acc:
+                best_validation_acc = val_acc
+                torch.save(self.state_dict(), os.path.join(PATH_TO_MODEL, f'model_{self.modelId}.pth'))
+                patience_counter = 0
+                best_model_epoch_number = epoch
+            else:
+                patience_counter += 1
+                if patience_counter >= patience_limit:
+                    need_to_stop = True
+                    print(f'early stopping after {epoch} / {epochs}')
 
             epoch += 1
 
+        # accuracy plots
         fig = plt.figure()
-        plot_name = f'Validation accuracy per epoch - Model_{self.modelId}'
-        plt.title(plot_name)
-        plt.plot(val_accuracies)
-        if with_early_stopping:
-            plt.plot(best_model_epoch_number, val_accuracies[best_model_epoch_number], 'r*',
-                     label='Best Validation Accuracy')
+        val_acc_plot_name = f'Accuracy per epoch - Model_{self.modelId}'
+        plt.title(val_acc_plot_name)
+        plt.plot(train_accuracies, label='Train Accuracy')
+        plt.plot(val_accuracies, label='Validation Accuracy')
+
+        plt.plot(best_model_epoch_number, val_accuracies[best_model_epoch_number], 'r*',
+                 label='Best Validation Accuracy')
         plt.legend()
-        fig.savefig(os.path.join(PATH_TO_PLOTS, plot_name))
+        fig.savefig(os.path.join(PATH_TO_PLOTS, val_acc_plot_name))
         plt.close(fig)
         plt.clf()
 
-        validation_acc = self.calculate_accuracy(data_loaders[VALID], with_grad=False)
-        test_acc = self.calculate_accuracy(data_loaders[TEST], with_grad=False)
-        print(f'Validation Accuracy: {(validation_acc * 100):.2f}%')
-        print(f'Test Accuracy: {(test_acc * 100):.2f}%')
+        # loss plots
+        val_loss_plot_name = f'Loss per epoch - Model_{self.modelId}'
+        fig = plt.figure()
+        plt.title(val_loss_plot_name)
+        plt.plot(train_losses, label='Train Loss')
+        plt.plot(valid_losses, label='Validation Loss')
+
+        plt.plot(best_model_epoch_number, valid_losses[best_model_epoch_number], 'r*',
+                 label='Best Validation Accuracy')
+        plt.legend()
+        fig.savefig(os.path.join(PATH_TO_PLOTS, val_loss_plot_name))
+        plt.close(fig)
+        plt.clf()
+
+        # final results
+        test_acc, test_loss = self.calculate_accuracy_and_loss(data_loaders[TEST])
+        print(f'Train: Accuracy = {(train_accuracies[-1] * 100):.2f}%, Avg Loss = {train_losses[-1]:.2f}')
+        print(f'Validation: Accuracy = {(val_accuracies[-1] * 100):.2f}%, Avg Loss = {valid_losses[-1]:.2f}')
+        print(f'Test: Accuracy = {(test_acc * 100):.2f}%, Avg Loss = {test_loss:.2f}')
         print()

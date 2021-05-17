@@ -12,10 +12,10 @@ class GTSRBDataset(Dataset):
 
     def __init__(self, indices=None, train=True, transform=None):
         dataType = 'Train.csv' if train else 'Test.csv'
-        path = os.getcwd() + '\\data\\' + dataType
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', dataType)
 
         self.csv_data = pd.read_csv(path)
-        if indices:
+        if indices is not None:
             self.size = len(indices)
         else:
             self.size = len(self.csv_data)

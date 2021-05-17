@@ -17,6 +17,7 @@ def print_time(time_taken: float) -> None:
 
 
 def main():
+    print('\nInitiating data...')
     # dataset initialization
     def_dataset = GTSRBDataset(transform=DEFAULT_TRANSFORM)
     datasets = [def_dataset]
@@ -81,7 +82,7 @@ def main():
     # 3rd model
     print('\n------------------------3rd Model------------------------')
     start_time = time.time()
-    model3 = GTSRBModel(3, dropout=True, batch_normalization=True, fully_connected_nn=False)
+    model3 = GTSRBModel(3, dropout=True, batch_normalization=True, fully_connected_layers=False)
     print(model3)
     print(f'number of parameters: {model3.count_parameters()}')
     model3.train_model(epochs, dataLoaders)
