@@ -31,7 +31,7 @@ class GTSRBModel(nn.Module):
 
         self.logSoftMax = nn.LogSoftmax(dim=1)
 
-        self.featureExtractor = nn.Sequential(
+        self.feature_extractor = nn.Sequential(
             nn.Conv2d(in_channels=3, out_channels=6, kernel_size=(5, 5)),
             nn.ReLU(),
             nn.MaxPool2d(2),
@@ -94,45 +94,13 @@ class GTSRBModel(nn.Module):
             self.classifier.add_module(f'{model_id}', nn.Conv2d(in_channels=84, out_channels=43, kernel_size=(1, 1)))
             model_id += 1
 
-        self.localization = nn.Sequential(
-            nn.Conv2d(3, 8, kernel_size=(7, 7)),
-            nn.MaxPool2d(2, stride=2),
-            nn.ReLU(True),
-            nn.Conv2d(8, 10, kernel_size=(5, 5)),
-            nn.MaxPool2d(2, stride=2),
-            nn.ReLU(True)
-        )
-        # Regressor for the 3 * 2 affine matrix
-        self.fc_loc = nn.Sequential(
-            nn.Linear(10 * 4 * 4, 32),
-            nn.ReLU(True),
-            nn.Linear(32, 3 * 2)
-        )
-
-        # Initialize the weights/bias with identity transformation
-        self.fc_loc[2].weight.data.zero_()
-        self.fc_loc[2].bias.data.copy_(torch.tensor([1, 0, 0, 0, 1, 0], dtype=torch.float))
-
         self.optimizer = torch.optim.Adam(self.parameters(), lr=rate, weight_decay=weight_decay)
         self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=3, gamma=0.8)
 
         self.to(DEVICE)
 
-    # Spatial transformer network forward function
-    def spatial_transformer_network(self, x):
-        xs = self.localization(x)
-        xs = xs.view(-1, 10 * 4 * 4)
-        theta = self.fc_loc(xs)
-        theta = theta.view(-1, 2, 3)
-        grid = nn_functional.affine_grid(theta, x.size(), align_corners=True)
-        x = nn_functional.grid_sample(x, grid, align_corners=True)
-        return x
-
     def forward(self, x):
-        # transform the input
-        x = self.spatial_transformer_network(x)
-
-        features = self.featureExtractor(x)
+        features = self.feature_extractor(x)
         class_scores = self.classifier(features)
         probabilities = self.logSoftMax(class_scores)
         return probabilities
