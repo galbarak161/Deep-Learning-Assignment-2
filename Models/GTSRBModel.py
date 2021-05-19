@@ -1,11 +1,9 @@
 import os
-
-import numpy as np
 import torch
 from PIL import Image
 from matplotlib import pyplot as plt
 from torch import nn
-import torch.nn.functional as nn_functional
+from torchsummary import summary
 from torch.utils.data import DataLoader
 
 from Models.GTSRBDataset import TRAIN, VALID, TEST
@@ -99,14 +97,15 @@ class GTSRBModel(nn.Module):
 
         self.to(DEVICE)
 
+        print()
+        summary(self, input_size=(3, 30, 30))
+        print()
+
     def forward(self, x):
         features = self.feature_extractor(x)
         class_scores = self.classifier(features)
         probabilities = self.logSoftMax(class_scores)
         return probabilities
-
-    def count_parameters(self) -> int:
-        return sum(p.numel() for p in self.parameters() if p.requires_grad)
 
     def get_predictions(self, path_to_image):
         img = Image.open(path_to_image)
