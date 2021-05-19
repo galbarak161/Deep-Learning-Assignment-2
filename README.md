@@ -140,18 +140,22 @@ number of parameters: 56483
 
 ## Training Results
 ```
-model 1
-    early stopping after 134 / 150
-    Validation Accuracy: 96.66%
-    Test Accuracy: 96.99%
 
-  model 2
-    early stopping after 84 / 120
-    Validation Accuracy: 97.32%
-    Test Accuracy: 97.51%
+------------------------1st Model------------------------
+early stopping after 111 / 150
+Train: Accuracy = 98.25%, Avg Loss = 0.07
+Validation: Accuracy = 96.62%, Avg Loss = 0.13
+Test: Accuracy = 96.66%, Avg Loss = 0.18
 
-  model 3
-    early stopping after 66 / 120
-    Validation Accuracy: 97.30%
-    Test Accuracy: 98.09%
+------------------------2nd Model-----------------------
+early stopping after 93 / 150
+Train: Accuracy = 98.66%, Avg Loss = 0.06
+Validation: Accuracy = 97.25%, Avg Loss = 0.10
+Test: Accuracy = 97.83%, Avg Loss = 0.07
+
+------------------------3rd Model------------------------
+early stopping after 87 / 150
+Train: Accuracy = 98.63%, Avg Loss = 0.06
+Validation: Accuracy = 97.31%, Avg Loss = 0.10
+Test: Accuracy = 97.68%, Avg Loss = 0.09
 ```
