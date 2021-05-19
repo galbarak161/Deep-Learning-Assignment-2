@@ -3,7 +3,6 @@ import torch
 from PIL import Image
 from matplotlib import pyplot as plt
 from torch import nn
-from torchsummary import summary
 from torch.utils.data import DataLoader
 
 from Models.GTSRBDataset import TRAIN, VALID, TEST
@@ -96,10 +95,6 @@ class GTSRBModel(nn.Module):
         self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=3, gamma=0.8)
 
         self.to(DEVICE)
-
-        print()
-        summary(self, input_size=(3, 30, 30))
-        print()
 
     def forward(self, x):
         features = self.feature_extractor(x)

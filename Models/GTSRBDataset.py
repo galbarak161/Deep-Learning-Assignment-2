@@ -29,7 +29,7 @@ class GTSRBDataset(Dataset):
         if self.indices:
             idx = self.indices[idx]
         label = self.csv_data['ClassId'][idx]
-        relativePath = 'data\\' + self.csv_data['Path'][idx]
+        relativePath = os.path.join('data', self.csv_data['Path'][idx])
         imgPath = os.path.join(os.getcwd(), relativePath)
 
         img = Image.open(imgPath)
