@@ -18,7 +18,7 @@ model = GTSRBModel(model_num, dropout=True, batch_normalization=True, fully_conn
 
 path_to_model = os.path.join(PATH_TO_MODEL, f'model_{model_num}.pth')
 if os.path.isfile(path_to_model):
-    model.load_state_dict(torch.load(path_to_model))
+    model.load_state_dict(torch.load(path_to_model, map_location=torch.device('cpu')))
 
 pathToExamples = os.path.join(os.getcwd(), 'images_examples', 'Meta')
 
