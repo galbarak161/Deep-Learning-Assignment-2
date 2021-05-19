@@ -2,11 +2,23 @@ import tkinter as tk
 from tkinter import filedialog
 from tkinter import *
 
+import torch
 from PIL import ImageTk, Image
 import os
 
 from GUI.hw2_labels_dictionary import classes
-from Models import model
+
+# load the trained model
+from Models.GTSRBModel import GTSRBModel
+
+from Models.model.ModelMeta import PATH_TO_MODEL
+
+model_num = 3
+model = GTSRBModel(model_num, dropout=True, batch_normalization=True, fully_connected_layers=False)
+
+path_to_model = os.path.join(PATH_TO_MODEL, f'model_{model_num}.pth')
+if os.path.isfile(path_to_model):
+    model.load_state_dict(torch.load(path_to_model))
 
 pathToExamples = os.path.join(os.getcwd(), 'images_examples', 'Meta')
 
