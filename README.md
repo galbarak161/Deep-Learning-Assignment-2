@@ -14,7 +14,7 @@ The dataset contains almost 40,000 images of different traffic signs. It is furt
 Then we used several techniques of dataset augmentations to create more training and validation data.
 
 ```
-    old data size: 39209, new size: 133301
+    old data size: 39209, new size: 274457
 ```
 
  ## Networks Visualization   
@@ -142,20 +142,21 @@ number of parameters: 56483
 ```
 
 ------------------------1st Model------------------------
-early stopping after 111 / 150
-Train: Accuracy = 98.25%, Avg Loss = 0.07
-Validation: Accuracy = 96.62%, Avg Loss = 0.13
-Test: Accuracy = 96.66%, Avg Loss = 0.18
+early stopping after 103 / 120
+Train: Accuracy = 96.28%, Avg Loss = 0.15
+Validation: Accuracy = 93.74%, Avg Loss = 0.23
+Test: Accuracy = 93.57%, Avg Loss = 0.28
 
 ------------------------2nd Model-----------------------
-early stopping after 93 / 150
-Train: Accuracy = 98.66%, Avg Loss = 0.06
-Validation: Accuracy = 97.25%, Avg Loss = 0.10
-Test: Accuracy = 97.83%, Avg Loss = 0.07
+early stopping after 89 / 120
+Train: Accuracy = 97.22%, Avg Loss = 0.12
+Validation: Accuracy = 95.13%, Avg Loss = 0.18
+Test: Accuracy = 95.36%, Avg Loss = 0.16
 
 ------------------------3rd Model------------------------
-early stopping after 87 / 150
-Train: Accuracy = 98.63%, Avg Loss = 0.06
-Validation: Accuracy = 97.31%, Avg Loss = 0.10
-Test: Accuracy = 97.68%, Avg Loss = 0.09
+early stopping after 94 / 120
+Train: Accuracy = 97.14%, Avg Loss = 0.12
+Validation: Accuracy = 94.98%, Avg Loss = 0.18
+Test: Accuracy = 95.71%, Avg Loss = 0.15
+
 ```
