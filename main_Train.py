@@ -2,8 +2,6 @@ import numpy as np
 from torch.utils.data import DataLoader, SubsetRandomSampler, ConcatDataset
 import time
 
-from torchsummary import summary
-
 from GTSRBDataset import GTSRBDataset, TRAIN, TEST, VALID
 from GTSRBModel import GTSRBModel
 from Transforms import transformations, DEFAULT_TRANSFORM
@@ -66,7 +64,7 @@ def main():
     print('\n------------------------1st Model------------------------')
     start_time = time.time()
     model1 = GTSRBModel(1)
-    summary(model1, input_size=(3, 30, 30))
+    print(model1)
     model1.train_model(epochs, dataLoaders)
     end_time = time.time()
     print_time(end_time - start_time)
@@ -75,7 +73,7 @@ def main():
     print('\n------------------------2nd Model-----------------------')
     start_time = time.time()
     model2 = GTSRBModel(2, dropout=True, batch_normalization=True)
-    summary(model2, input_size=(3, 30, 30))
+    print(model2)
     model2.train_model(epochs, dataLoaders)
     end_time = time.time()
     print_time(end_time - start_time)
@@ -84,7 +82,7 @@ def main():
     print('\n------------------------3rd Model------------------------')
     start_time = time.time()
     model3 = GTSRBModel(3, dropout=True, batch_normalization=True, fully_connected_layers=False)
-    summary(model3, input_size=(3, 30, 30))
+    print(model3)
     model3.train_model(epochs, dataLoaders)
     end_time = time.time()
     print_time(end_time - start_time)
