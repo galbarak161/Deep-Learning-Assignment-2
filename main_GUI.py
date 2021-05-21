@@ -19,7 +19,7 @@ path_to_model = os.path.join(PATH_TO_MODEL, f'model_{model_num}.pth')
 if os.path.isfile(path_to_model):
     model.load_state_dict(torch.load(path_to_model, map_location=torch.device(DEVICE)))
 
-pathToExamples = os.path.join(os.getcwd(), 'images_examples', 'Meta')
+pathToExamples = os.path.join(os.getcwd(), 'data', 'Meta')
 
 # initialise GUI
 top = tk.Tk()
