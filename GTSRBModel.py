@@ -144,6 +144,7 @@ class GTSRBModel(nn.Module):
         patience_counter = 0
         need_to_stop = False
         best_model_epoch_number = 0
+        model_path = os.path.join(PATH_TO_MODEL, f'model_{self.modelId}.pth')
 
         # results lists
         train_accuracies = []
@@ -181,7 +182,7 @@ class GTSRBModel(nn.Module):
             # early stopping check
             if val_acc > best_validation_acc:
                 best_validation_acc = val_acc
-                torch.save(self.state_dict(), os.path.join(PATH_TO_MODEL, f'model_{self.modelId}.pth'))
+                torch.save(self.state_dict(), model_path)
                 patience_counter = 0
                 best_model_epoch_number = epoch
             else:
@@ -221,8 +222,11 @@ class GTSRBModel(nn.Module):
         plt.clf()
 
         # final results
+        self.load_state_dict(torch.load(model_path))
         test_acc, test_loss = self.calculate_accuracy_and_loss(data_loaders[TEST])
-        print(f'Train: Accuracy = {(train_accuracies[-1] * 100):.2f}%, Avg Loss = {train_losses[-1]:.2f}')
-        print(f'Validation: Accuracy = {(val_accuracies[-1] * 100):.2f}%, Avg Loss = {valid_losses[-1]:.2f}')
+        print(f'Train: Accuracy = {(train_accuracies[best_model_epoch_number] * 100):.2f}%, '
+              f'Avg Loss = {train_losses[best_model_epoch_number]:.2f}')
+        print(f'Validation: Accuracy = {(val_accuracies[best_model_epoch_number] * 100):.2f}%, '
+              f'Avg Loss = {valid_losses[best_model_epoch_number]:.2f}')
         print(f'Test: Accuracy = {(test_acc * 100):.2f}%, Avg Loss = {test_loss:.2f}')
         print()
